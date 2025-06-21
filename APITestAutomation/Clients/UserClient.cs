@@ -17,13 +17,19 @@ namespace APITestAutomation.Clients
             client = new RestClient(baseUrl);             
         }
 
-        public RestResponse CreateUser(UserRequest request)
-        {
-            var req = new RestRequest("users", Method.Post); 
-            req.AddJsonBody(request);                        
-            return client.Execute(req);                      
-        }
+        //public RestResponse CreateUser(UserRequest request)
+        //{
+        //    var req = new RestRequest("users", Method.Post); 
+        //    req.AddJsonBody(request);                        
+        //    return client.Execute(req);                      
+        //}
 
+        public async Task<RestResponse> GetSingleUser(int user = 3)
+        {
+            var request = new RestRequest($"users/{user}", Method.Get).AddHeader("x-api-key", "reqres-free-v1");
+            return await client.ExecuteAsync(request);
+        }
+        
         public async Task<RestResponse> GetMultipleUsers(int page = 1)
         {
             var request = new RestRequest($"users?page={page}", Method.Get).AddHeader("x-api-key", "reqres-free-v1");
