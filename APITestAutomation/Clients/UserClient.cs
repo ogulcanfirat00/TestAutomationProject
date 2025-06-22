@@ -1,39 +1,51 @@
 ﻿using APITestAutomation.Models;
-using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace APITestAutomation.Clients
 {
     public class UserClient
-    {
-        private readonly RestClient client;
+    {        
+        private readonly HttpClient httpClient;
 
         public UserClient(string baseUrl)
         {
-            client = new RestClient(baseUrl);             
+            httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
+            httpClient.DefaultRequestHeaders.Add("x-api-key", "reqres-free-v1");
         }
 
-        //public RestResponse CreateUser(UserRequest request)
-        //{
-        //    var req = new RestRequest("users", Method.Post); 
-        //    req.AddJsonBody(request);                        
-        //    return client.Execute(req);                      
-        //}
-
-        public async Task<RestResponse> GetSingleUser(int user = 3)
+        public async Task<HttpResponseMessage> GetMultipleUsers(int page = 1)
         {
-            var request = new RestRequest($"users/{user}", Method.Get).AddHeader("x-api-key", "reqres-free-v1");
-            return await client.ExecuteAsync(request);
+            var response = await httpClient.GetAsync($"users?page={page}");
+            return response;
         }
-        
-        public async Task<RestResponse> GetMultipleUsers(int page = 1)
+
+        public async Task<HttpResponseMessage> GetSingleUser(int user = 1)
         {
-            var request = new RestRequest($"users?page={page}", Method.Get).AddHeader("x-api-key", "reqres-free-v1");
-            return await client.ExecuteAsync(request);
+            var response = await httpClient.GetAsync($"users/{user}");
+            return response;
+        }
+
+        public async Task<HttpResponseMessage> CreateUser(UserRequest request)
+        {
+
+            var json = JsonConvert.SerializeObject(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync("users", content);
+            return response;
+
+        }
+
+        public async Task<HttpResponseMessage> CreateUserWithInvalidKeys(UserRequestWithWrongModel request)
+        {
+
+            var json = JsonConvert.SerializeObject(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync("users", content);
+            return response;
+
         }
 
     }
